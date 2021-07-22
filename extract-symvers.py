@@ -99,6 +99,8 @@ class KernelImage(object):
 
     def symbols(self):
         symsearch = self.scan_symsearch()
+        if symsearch is None:
+            return
         for t, s in symsearch.items():
             crc_off = s['crcs'] - self.base
             for offset in range(s['start'] - self.base, s['stop'] - self.base, self.ptr_bytes * 2):
@@ -106,7 +108,7 @@ class KernelImage(object):
                 name_ptr = self.read_ptr(offset + self.ptr_bytes)
                 crc = self.read_uint(crc_off)
                 yield self.read_str(name_ptr - self.base), crc, t
-                crc_off += 4
+                crc_off += self.ptr_bytes
 
 class ScanFailException(Exception):
     pass
